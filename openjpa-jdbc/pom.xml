@@ -35,6 +35,14 @@
     <name>OpenJPA JDBC</name>
     <description>OpenJPA JDBC</description>
 
+    <properties>
+        <target.class>target/classes/org/apache/openjpa/jdbc/sql</target.class>
+
+        <badua.agent>-javaagent:${badua.jar.agent} -Doutput.file=${badua.output}</badua.agent>
+        <badua.windows.cli> mkdir ${badua.report.dir.win} | java -jar ${badua.jar.cli} report -classes ${target.class} -input ${badua.output} -xml ${badua.report.dir}/coverage.xml </badua.windows.cli>
+        <badua.unix.cli> mkdir ${badua.report.dir} | java -jar ${badua.jar.cli} report -classes ${target.class} -input ${badua.output} -xml ${badua.report.dir}/coverage.xml </badua.unix.cli>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.openjpa</groupId>
@@ -83,5 +91,171 @@
             <artifactId>jmock-junit4</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- ISW2 -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>4.6.1</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- ISW2 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.version}</version>
+                <configuration>
+                    <testFailureIgnore>true</testFailureIgnore>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- ISW2 -->
+    <profiles>
+        <profile>
+            <id>isw2-mutation</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <version>1.8.0</version>
+                        <configuration>
+                            <targetClasses>
+                                <param>org.apache.openjpa.jdbc.sql.DBDictionary</param>
+                            </targetClasses>
+                            <targetTests>
+                                <param>org.apache.openjpa.jdbc.sql.DBDictionaryTest</param>
+                            </targetTests>
+                            <avoidCallsTo>
+                                <avoidCallsTo>java.util.logging</avoidCallsTo>
+                                <avoidCallsTo>org.apache.log4j</avoidCallsTo>
+                                <avoidCallsTo>org.slf4j</avoidCallsTo>
+                                <avoidCallsTo>org.apache.commons.logging</avoidCallsTo>
+                            </avoidCallsTo>
+                            <reportsDirectory>${pit.report.dir}</reportsDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>mutation-coverage</id>
+                                <goals>
+                                    <goal>mutationCoverage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>isw2-dataflow-coverage</id>
+            <activation>
+                <property>
+                    <name>isw2-dataflow-coverage</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <argLine>
+                                ${badua.agent}
+                            </argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>Windows</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                </os>
+                <property>
+                    <name>isw2-dataflow-coverage</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>badua-cli</id>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <phase>verify</phase>
+                                <configuration>
+                                    <executable>cmd</executable>
+                                    <arguments>
+                                        <argument>/C</argument>
+                                        <argument>${badua.windows.cli}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>unix</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+                <property>
+                    <name>isw2-dataflow-coverage</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>badua-cli</id>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <phase>verify</phase>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <arguments>
+                                        <argument>-c</argument>
+                                        <argument>${badua.unix.cli}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
