@@ -21,7 +21,7 @@
     </properties>
 
     <dependencies>
-        <!-- MULTI-MODULE DEPENDENCIES -->
+        <!-- Multi Module dependencies commented: only mine is active -->
         <!--
         <dependency>
             <groupId>org.apache.openjpa.openjpa-examples</groupId>
@@ -134,32 +134,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <!--
-    <profiles>
-        <profile>
-            <id>isw2-mutation</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.pitest</groupId>
-                        <artifactId>pitest-maven</artifactId>
-                        <version>1.8.0</version>
-                        <executions>
-                            <execution>
-                                <id>pit-aggregation</id>
-                                <goals>
-                                    <goal>report-aggregate</goal>
-                                </goals>
-                                <configuration>
-                                    <reportsDirectory>${pit.report.dir}</reportsDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-    -->
 </project>
