@@ -37,6 +37,18 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>4.6.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>4.6.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.openjpa</groupId>
             <artifactId>openjpa-lib</artifactId>
             <version>${project.version}</version>
@@ -71,10 +83,28 @@
             <artifactId>xbean-asm9-shaded</artifactId>
             <version>${xbean.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jpa_2.2_spec</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <!-- ISW2 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <testFailureIgnore>true</testFailureIgnore>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>javacc-maven-plugin</artifactId>
@@ -142,7 +172,7 @@
                             </excludes>
                             <archive>
                                 <manifest>
-                                   <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                                 </manifest>
                                 <manifestEntries>
                                     <Implementation-Build>${buildNumber}</Implementation-Build>
@@ -161,5 +191,51 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- ISW2 -->
+    <profiles>
+        <profile>
+            <id>mutation-profile</id>
+            <properties>
+                <withHistory>true</withHistory>
+                <pitest.version>1.8.0</pitest.version>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <version>1.8.0</version>
+                        <configuration>
+                            <targetClasses>
+                                <param>org.apache.openjpa.util.CacheMap</param>
+                                <param>org.apache.openjpa.util.ProxyManagerImpl</param>
+                            </targetClasses>
+                            <targetTests>
+                                <param>org.apache.openjpa.util.CacheMapPinTest</param>
+                                <param>org.apache.openjpa.util.CacheMapPutTest</param>
+                                <param>org.apache.openjpa.util.ProxyManagerImplCopyArrayTest</param>
+                                <param>org.apache.openjpa.util.ProxyManagerImplCopyCustomTest</param>
+                            </targetTests>
+                            <avoidCallsTo>
+                                <avoidCallsTo>java.util.logging</avoidCallsTo>
+                                <avoidCallsTo>org.apache.log4j</avoidCallsTo>
+                                <avoidCallsTo>org.slf4j</avoidCallsTo>
+                                <avoidCallsTo>org.apache.commons.logging</avoidCallsTo>
+                            </avoidCallsTo>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>Creating PIT report</id>
+                                <goals>
+                                    <goal>mutationCoverage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

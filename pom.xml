@@ -20,13 +20,14 @@
 <!--
     Maven release plugin requires the project tag to be on a single line.
 -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-      <groupId>org.apache</groupId>
-      <artifactId>apache</artifactId>
-      <version>23</version>
+        <groupId>org.apache</groupId>
+        <artifactId>apache</artifactId>
+        <version>23</version>
     </parent>
 
     <groupId>org.apache.openjpa</groupId>
@@ -38,13 +39,17 @@
     <version>3.2.3-SNAPSHOT</version>
 
     <properties>
-
-    <!--Inserting JaCoCo coverage report directory-->
+        <!-- ISW2 -->
         <coverage.report.dir>target/coverage-reports</coverage.report.dir>
         <jacoco.report.dir>${coverage.report.dir}/jacoco-reports</jacoco.report.dir>
-        <!--Inserting Pit report directory-->
         <pit.report.dir>${coverage.report.dir}/pit-reports</pit.report.dir>
-        <!--TODO Badua-->
+        <badua.report.dir>${coverage.report.dir}/badua-reports</badua.report.dir>
+        <badua.report.dir.win>target\coverage-reports\badua-reports</badua.report.dir.win>
+        <badua.output>target/badua.ser</badua.output>
+        <badua.jar.agent>jars/badua/ba-dua-agent-rt-0.4.1-SNAPSHOT-all.jar</badua.jar.agent>
+        <badua.jar.cli>jars/badua/ba-dua-cli-0.4.1-SNAPSHOT-all.jar</badua.jar.cli>
+        <!-- ISW2 -->
+
         <java.class.version>1.8</java.class.version>
         <java.testclass.version>1.8</java.testclass.version>
 
@@ -111,7 +116,7 @@
 
         <jmock.version>2.9.0</jmock.version>
         <dbcp2.version>2.8.0</dbcp2.version>
-	<pool2.version>2.9.0</pool2.version>
+        <pool2.version>2.9.0</pool2.version>
     </properties>
 
     <licenses>
@@ -166,22 +171,20 @@
     </mailingLists>
 
     <distributionManagement>
-      <site>
-        <id>people.apache.org</id>
+        <site>
+            <id>people.apache.org</id>
             <url>${site.deploy.url}</url>
-      </site>
+        </site>
     </distributionManagement>
 
     <scm>
         <connection>scm:git:https://gitbox.apache.org/repos/asf/openjpa.git</connection>
         <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/openjpa.git</developerConnection>
         <url>https://gitbox.apache.org/repos/asf/openjpa.git</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <modules>
-        <!--ISW2 module dependency-->
-        <module>openjpa-report-aggregate</module>
         <module>openjpa-lib</module>
         <module>openjpa-kernel</module>
         <module>openjpa-jdbc</module>
@@ -200,6 +203,8 @@
         <module>openjpa-tools</module>
         <module>openjpa-features</module>
         <module>openjpa-junit5</module>
+        <!-- ISW2 -->
+        <module>openjpa-report-aggregate</module>
     </modules>
 
     <profiles>
@@ -396,17 +401,17 @@
             </properties>
             <build>
                 <plugins>
-                   <plugin>
-                       <groupId>org.apache.maven.plugins</groupId>
-                       <artifactId>maven-surefire-plugin</artifactId>
-                       <version>${maven.surefire.version}</version>
-                       <configuration>
-                           <argLine>${surefire.jvm.args}</argLine>
-                           <includes>
-                               <include />
-                           </includes>
-                       </configuration>
-                   </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <configuration>
+                            <argLine>${surefire.jvm.args}</argLine>
+                            <includes>
+                                <include />
+                            </includes>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -424,15 +429,14 @@
             <id>test-derby</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
-            <property>
-                <name>test-derby</name>
-            </property>
+                <property>
+                    <name>test-derby</name>
+                </property>
             </activation>
             <dependencies>
                 <dependency>
                     <groupId>org.apache.derby</groupId>
                     <artifactId>derby</artifactId>
-                    <scope>test</scope>
                 </dependency>
             </dependencies>
             <properties>
@@ -1753,12 +1757,11 @@
             </repositories>
         </profile>
 
-        <!-- ISW2 profiles -->
+        <!-- ISW2 -->
         <profile>
-        <!--JaCoCO coverage profile-->
             <id>isw2-coverage</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <build>
                 <plugins>
@@ -1768,19 +1771,32 @@
                         <version>0.8.8</version>
                         <executions>
                             <execution>
-                                <id>prepare-agent</id>
+                                <id>prepare-agent-ut</id>
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
                             </execution>
+                            <!-- Integration-tests executed with failsafe-plugin -->
+                            <!--
+                            <execution>
+                                <id>prepare-agent-it</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>prepare-agent-integration</goal>
+                                </goals>
+                                <configuration>
+                                    <append>true</append>
+                                    <destFile>${coverage.reportDir}/jacoco-it.exec</destFile>
+                                </configuration>
+                            </execution>
+                            -->
                         </executions>
                     </plugin>
                 </plugins>
             </build>
         </profile>
-        <!--ISW2 Mutation testing profile-->
         <profile>
-            <id>isw2-mutationTesting</id>
+            <id>isw2-mutation</id>
             <build>
                 <plugins>
                     <plugin>
@@ -1810,15 +1826,13 @@
         </profile>
     </profiles>
 
-
-
     <!-- default versions for dependencies that child modules may include -->
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-pool2</artifactId>
-		<version>${pool2.version}</version>
+                <version>${pool2.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-logging</groupId>
@@ -1830,10 +1844,10 @@
                 <artifactId>serp</artifactId>
                 <version>1.15.1</version>
                 <exclusions>
-                  <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                  </exclusion>
+                    <exclusion>
+                        <groupId>junit</groupId>
+                        <artifactId>junit</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -1926,14 +1940,14 @@
             </dependency>
 
             <dependency>
-              <groupId>io.fabric8</groupId>
-              <artifactId>kubernetes-client</artifactId>
-              <version>${kubernetes-client.version}</version>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-client</artifactId>
+                <version>${kubernetes-client.version}</version>
             </dependency>
             <dependency>
-              <groupId>io.fabric8</groupId>
-              <artifactId>kubernetes-server-mock</artifactId>
-              <version>${kubernetes-client.version}</version>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-server-mock</artifactId>
+                <version>${kubernetes-client.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -2033,71 +2047,7 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.version}</version>
-                    <configuration>
-                        <argLine>${surefire.jvm.args}</argLine>
-                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                        <trimStackTrace>false</trimStackTrace>
-                        <useSystemClassLoader>true</useSystemClassLoader>
-                        <excludes>
-                            <!-- exclude classes that include a $; inner classes
-                                 are not test cases per OpenJPA standards -->
-                            <exclude>org/apache/openjpa/**/*$*.class</exclude>
-                        </excludes>
-                    <systemProperties>
-                        <property>
-                            <name>openjpa.Log</name>
-                            <value>${openjpa.Log}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.DynamicEnhancementAgent</name>
-                            <value>${openjpa.DynamicEnhancementAgent}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.ConnectionDriverName</name>
-                            <value>${connection.driver.name}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.ConnectionURL</name>
-                            <value>${connection.url}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.ConnectionUserName</name>
-                            <value>${connection.username}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.ConnectionPassword</name>
-                            <value>${connection.password}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.jdbc.DBDictionary</name>
-                            <value>${jdbc.DBDictionary}</value>
-                        </property>
-                        <property>
-                            <name>derby.stream.error.file</name>
-                            <value>target/derby.log</value>
-                        </property>
-                        <property>
-                            <name>derby.locks.deadlockTimeout</name>
-                            <value>${derby.locks.deadlockTimeout}</value>
-                        </property>
-                        <property>
-                            <name>derby.locks.waitTimeout</name>
-                            <value>${derby.locks.waitTimeout}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.ConnectionProperties</name>
-                            <value>${dbcp.args}</value>
-                        </property>
-                        <property>
-                            <name>tests.openjpa.allowfailure</name>
-                            <value>${tests.openjpa.allowfailure}</value>
-                        </property>
-                        <property>
-                            <name>openjpa.jdbc.DriverDataSource</name>
-                            <value>${tests.openjpa.driverDataSource}</value>
-                        </property>
-                    </systemProperties>
-                    </configuration>
+
                 </plugin>
                 <plugin>
                     <groupId>io.fabric8</groupId>
@@ -2220,7 +2170,7 @@
                             <configuration>
                                 <archive>
                                     <manifest>
-                                       <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                        <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                                     </manifest>
                                     <manifestEntries>
                                         <Implementation-Build>${buildNumber}</Implementation-Build>

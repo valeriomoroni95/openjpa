@@ -107,7 +107,7 @@ public class CacheMap
      *
      * @since 1.1.0
      */
-    public CacheMap(boolean lru, int max, int size, float load,
+    public  CacheMap(boolean lru, int max, int size, float load,
         int concurrencyLevel) {
         if (size < 0)
             size = 500;
